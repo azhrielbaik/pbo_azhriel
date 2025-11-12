@@ -1,103 +1,64 @@
+<?php 
+session_start();
+if($_SESSION['status'] != "login"){
+    header("location:login.php?pesan=belum_login");
+    exit;
+}
+include 'koneksi.php';
+$db = new database();
+
+// Menghitung jumlah data untuk dashboard
+$jumlah_barang = $db->hitung_data_barang();
+$jumlah_customer = $db->hitung_data_customer();
+$jumlah_supplier = $db->hitung_data_supplier();
+?>
 <!DOCTYPE html>
 <html>
 <head>
-    <title>DATA PEKERJA DI PT MENCARI CINTA SEJATI</title>
-    <link rel="stylesheet" type="text/css" href="style.css">
-    
-    </head>
+    <title>Dashboard - Aplikasi CRUD</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f9f9f9; }
+        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .header h1 { margin: 0; }
+        .header span { font-size: 14px; color: #333; }
+        .header a { color: #dc3545; text-decoration: none; font-weight: bold; }
+        .menu-container { margin-top: 30px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+        .menu-button { padding: 20px; text-align: center; font-size: 16px; color: white; background-color: #007BFF; border-radius: 5px; text-decoration: none; transition: background-color 0.3s; display: flex; flex-direction: column; justify-content: space-between; min-height: 80px; }
+        .menu-button:hover { background-color: #0056b3; }
+        .menu-button.supplier { background-color: #28a745; }
+        .menu-button.supplier:hover { background-color: #218838; }
+        .menu-button.customer { background-color: #ffc107; color: #333; }
+        .menu-button.customer:hover { background-color: #e0a800; }
+        .menu-button span.count { display: block; font-size: 32px; font-weight: bold; margin-top: 10px; }
+    </style>
+</head>
 <body>
-
-<div class="menu">
     <div class="container">
-        <ul>
-            <li><a href="index.php">Home</a></li>
-            
-            <li>
-                <a href="#">Data Master</a>
-                <ul>
-                    <li><a href="#">Data User</a></li>
-                    <li><a href="#">Data Barang</a></li>
-                    <li><a href="#">Data Customer</a></li>
-                    <li><a href="#">Data Supplier</a></li>
-                </ul>
-            </li>
-
-            <li>
-                <a href="#">Data Transaksi</a>
-                <ul>
-                    <li><a href="#">Transaksi Pembelian</a></li>
-                    <li><a href="#">Transaksi Penjualan</a></li>
-                </ul>
-            </li>
-
-            <li>
-                <a href="#">Laporan</a>
-                <ul>
-                    <li><a href="#">Laporan Data Barang</a></li>
-                    <li><a href="#">Laporan Data Customer</a></li>
-                    <li><a href="#">Laporan Data Supplier</a></li>
-                    <li><a href="#">Laporan Transaksi Pembelian</a></li>
-                    <li><a href="#">Laporan Transaksi Penjualan</a></li>
-                </ul>
-            </li>
-        </ul>
+        <div class="header">
+            <div>
+                <h1>Dashboard Aplikasi</h1>
+                <span>Selamat datang, <strong><?php echo $_SESSION['username']; ?></strong>!</span>
+            </div>
+            <a href="logout.php" onclick="return confirm('Anda yakin ingin keluar?')">Keluar Aplikasi</a>
+        </div>
+        
+        <p style="margin-top: 20px;">Silakan pilih menu yang ingin Anda kelola:</p>
+        
+        <div class="menu-container">
+            <a href="tampil_barang.php" class="menu-button">
+                Kelola Data Barang Elektronik
+                <span class="count"><?php echo $jumlah_barang; ?></span>
+            </a>
+            <a href="tampil_customer.php" class="menu-button customer">
+                Kelola Data Pembeli
+                <span class="count"><?php echo $jumlah_customer; ?></span>
+            </a>
+            <a href="tampil_supplier.php" class="menu-button supplier">
+                Kelola Data Supplier
+                <span class="count"><?php echo $jumlah_supplier; ?></span>
+            </a>
+        </div>
     </div>
-</div>
-
-<div class="container">
-    <div class="judul">
-        <h1>Membuat CRUD Dengan PHP Dan MySQL</h1>
-        <h2>Menampilkan data dari database</h2>
-    </div>
-
-    <?php
-    // Pesan notifikasi
-    if(isset($_GET['pesan'])){
-        $pesan = $_GET['pesan'];
-        // Mengganti div alert Bootstrap dengan echo biasa (atau tambahkan styling untuk pesan jika perlu)
-        if($pesan == "input"){
-            echo "Data berhasil di input.";
-        }else if($pesan == "update"){
-            echo "Data berhasil di update.";
-        }else if($pesan == "hapus"){
-            echo "Data berhasil di hapus.";
-        }
-    }
-    ?>
-    <div class="mt-8"></div> <a class="tombol" href="input.php">+ Tambah Data Baru</a>
-
-    <h3>Data user</h3>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Nama</th>
-                <th>Alamat</th>
-                <th>Pekerjaan</th>
-                <th>Opsi</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php 
-            include "koneksi.php";
-            $query_mysql = mysqli_query($koneksi, "SELECT * FROM user") or die(mysqli_error($koneksi));
-            $nomor = 1;
-            while($data = mysqli_fetch_array($query_mysql)){
-            ?>
-            <tr>
-                <td><?php echo $nomor++; ?></td>
-                <td><?php echo $data['nama']; ?></td>
-                <td><?php echo $data['alamat']; ?></td>
-                <td><?php echo $data['pekerjaan']; ?></td>
-                <td>
-                    <a class="edit" href="edit.php?id=<?php echo $data['id']; ?>">Edit</a> 
-                    <a class="hapus" href="hapus.php?id=<?php echo $data['id']; ?>">Hapus</a>
-                </td>
-            </tr>
-            <?php } ?>
-        </tbody>
-    </table>
-</div>
-
 </body>
 </html>
